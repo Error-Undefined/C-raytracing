@@ -1,6 +1,10 @@
 #include <stdio.h>
 
+#include "src/fileout.h"
+
 int main()
 {
-  printf("Heyo!\n");
+  int a = testfun();
+
+  printf("Heyo! %d \n", a);
 }
