@@ -4,4 +4,6 @@
 *.out
 *.o
 
+#Generated files
 main
+*.ppm
