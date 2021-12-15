@@ -1,15 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "renderer.h"
 #include "fileout.h"
 #include "vector3.h"
 #include "ray.h"
 
-static color ray_color(ray* r)
+bool hit_sphere(point3* center, double radius, ray* r)
 {
-  vec3_norm(&r->direction);
-  double t = 0.5*(r->direction.y + 1.0);
+  vec3 oc = vec3_sub_new(&r->origin, center);
+  double a = vec3_dot(&r->direction, &r->direction);
+  double b = 2.0 * vec3_dot(&oc, &r->direction);
+  double c = vec3_dot(&oc, &oc) - radius*radius;
+  double discriminant = b*b - 4*a*c;
+  return (discriminant > 0);
+}
+
+static color ray_color(ray* r)
+{ 
+  point3 sphere_center = {-3,0,2};
+  double radius = 0.7;
+  if (hit_sphere(&sphere_center, radius, r))
+  {
+    color c = {0.0, 0.0, 1.0};
+    return c;
+  }
+
+  //vec3_norm(&r->direction);
+  double t = 0.5*(r->direction.y/vec3_len(&r->direction) + 1.0);
 
   color c1 = {0.5, 1.0, 0.7};
   color c2 = {1.0, 1.0, 1.0};
