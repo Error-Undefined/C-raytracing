@@ -17,7 +17,7 @@ PROGS = main
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
-main: main.o ./src/fileout.o
+main: main.o ./src/fileout.o ./src/vector3.o
 
 # Phony targets
 .PHONY: all all_objs clean 
