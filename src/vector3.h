@@ -10,6 +10,8 @@ struct vector3
 typedef struct vector3 point3;
 typedef struct vector3 color;
 
+struct vector3 *copy_vector3(struct vector3* v);
+
 // Vector3 functions
 
 void vec3_add(struct vector3 *u, struct vector3 *other);

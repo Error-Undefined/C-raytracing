@@ -1,6 +1,16 @@
+#include <stdlib.h>
 #include <math.h>
 
 #include "vector3.h"
+
+struct vector3 *copy_vector3(struct vector3* v)
+{
+  struct vector3* vec = malloc(sizeof(struct vector3));
+  vec->x = v->x;
+  vec->y = v->y;
+  vec->z = v->z;
+  return vec;
+}
 
 // Inplace 
 void vec3_add(struct vector3 *u, struct vector3 *other)
