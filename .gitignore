@@ -7,3 +7,6 @@
 #Generated files
 main
 *.ppm
+
+#macos
+.DS_store

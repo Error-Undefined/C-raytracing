@@ -2,6 +2,6 @@
 #define RENDERER_H
 
 //Entry point to the renderer
-void render();
+void render(int h, int w);
 
 #endif

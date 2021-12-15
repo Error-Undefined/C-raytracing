@@ -6,7 +6,7 @@ CC  = $(CXX)
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 # Define preprocessor, compiler, and linker flags.
-CXXFLAGS =  -O2 -Wall -Wextra -pedantic-errors -Wold-style-cast 
+CXXFLAGS =  -0g -Wall -Wextra -pedantic-errors -Wold-style-cast 
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS = -g 

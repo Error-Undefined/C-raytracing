@@ -3,7 +3,7 @@
 #include "fileout.h"
 #include "vector3.h"
 
-int write_file(const char* path, color* color_data, int height, int width)
+int write_file(const char* path, color** color_data, int height, int width)
 {
   FILE* fp;
   fp = fopen(path, "w+");
@@ -16,13 +16,13 @@ int write_file(const char* path, color* color_data, int height, int width)
   fputs("P3\n", fp);
   fprintf(fp, "%d %d\n255\n", width, height);
 
-  for(int h = 0;  h < height; h++)
+  for (int h = 0; h < height; h++)
   {
-    for (int w = 0; w < width; w++)
+    for(int w = 0;  w < width; w++)
     {
-      int r = (int) color_data[256*h + w].x;
-      int g = (int) color_data[256*h + w].y;
-      int b = (int) color_data[256*h + w].z;
+      int r = (int) (color_data[h][w].x * 255.999);
+      int g = (int) (color_data[h][w].y * 255.999);
+      int b = (int) (color_data[h][w].z * 255.999);
       fprintf(fp, "%d %d %d\n", r, g, b);
     }
   }
