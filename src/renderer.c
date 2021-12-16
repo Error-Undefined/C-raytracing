@@ -29,7 +29,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   hit_record rec;
   rec.t = 0.0;
 
-  bool hit = hit_world(world, r, 0, RAYTRACE_INFINITY, &rec);
+  bool hit = hit_world(world, r, 0.0001, RAYTRACE_INFINITY, &rec);
   
   if (hit)
   {  
@@ -90,7 +90,7 @@ void render(int h, int w)
   vec3_sub(&upper_left, &acc);
 
   int samples_per_pixel = 20;
-  int ray_depth = 15;
+  int ray_depth = 20;
 
   // World
   sphere s1;
@@ -103,8 +103,14 @@ void render(int h, int w)
   vec3_copy_into(&s2.center, &center2);
   s2.radius = 100;
 
+  sphere s3;
+  point3 center3 = {2,-1,2};
+  vec3_copy_into(&s3.center, &center3);
+  s3.radius = 1;
+
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
+  add_hittable_object(world, &s3, hittable_sphere);
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
@@ -142,6 +148,7 @@ void render(int h, int w)
         vec3_add(&c, &sample_color);
       }
       vec3_mul(&c, 1.0/samples_per_pixel);
+      //Sqrt for gamma correction
       image_buf[cur_h][cur_w].x = sqrt(c.x);
       image_buf[cur_h][cur_w].y = sqrt(c.y);
       image_buf[cur_h][cur_w].z = sqrt(c.z);
