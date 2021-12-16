@@ -35,7 +35,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   {  
     // Create target point
     point3 target = {0, 0, 0};
-    vec3 random_dev = vec3_random_in_unit_sphere();
+    vec3 random_dev = vec3_random_unit_vector();
     vec3_copy_into(&target, &rec.p);
     vec3_add(&target, &rec.normal);
     vec3_add(&target, &random_dev);
@@ -97,16 +97,19 @@ void render(int h, int w)
   point3 center1 = {0,-0.1,1};
   vec3_copy_into(&s1.center, &center1);
   s1.radius = 0.5;
+  s1.material = lambertian_material;
 
   sphere s2;
   point3 center2 = {0,100.5,1};
   vec3_copy_into(&s2.center, &center2);
   s2.radius = 100;
+  s2.material = lambertian_material;
 
   sphere s3;
   point3 center3 = {2,-1,2};
   vec3_copy_into(&s3.center, &center3);
   s3.radius = 1;
+  s3.material = lambertian_material;
 
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
