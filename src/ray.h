@@ -11,9 +11,9 @@ struct ray
 
 typedef struct ray ray;
 
-point3 at(struct ray* r, double t)
+point3 ray_at(struct ray* r, double t)
 {
-  point3 point = {r->origin.x, r->origin.y, r->origin.z};
+  point3 point = {r->direction.x, r->direction.y, r->direction.z};
   vec3_mul(&point, t);
   vec3_add(&point, &r->origin);
   return point;
