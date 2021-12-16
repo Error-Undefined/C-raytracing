@@ -119,10 +119,28 @@ struct vector3 vec3_random_in_unit_sphere()
 {
   double r = random_double();
   double costheta = random_double();
-  double sintheta = random_double();
-  double cosphi = random_double();
-  double sinphi = random_double();
+  double sintheta = sqrt(1 - costheta*costheta);
+  double cosphi = random_range_double(-1, 1);
+  double sinphi = sqrt(1 - cosphi*cosphi);
 
   struct vector3 new_vec = {r*sintheta*cosphi, r*sintheta*sinphi, r*costheta};
+
   return new_vec; 
+}
+
+struct vector3 vec3_random_unit_vector()
+{
+  vec3 in_sphere = vec3_random_in_unit_sphere();
+  vec3_norm(&in_sphere);
+  return in_sphere;
+}
+
+struct vector3 vec3_random_in_hemisphere(vec3* normal)
+{
+  vec3 in_unit_sphere = vec3_random_in_unit_sphere();
+  if(vec3_dot(&in_unit_sphere, normal) < 0.0)
+  {
+    vec3_mul(&in_unit_sphere, -1.0);
+  }
+  return in_unit_sphere;
 }
