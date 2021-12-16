@@ -15,18 +15,19 @@
 
 #define RAYTRACE_INFINITY DBL_MAX
 
+static inline double random_double()
+{
+  double d = rand() / (RAND_MAX - 1.0);
+  return d;
+}
+
+static inline double random_range_double(double min, double max)
+{
+  return min + (max - min)*random_double();
+}
+
 static color ray_color(hittable_list* world, ray* r)
 { 
-  /* 
-  sphere s;
-  point3 center = {0,0,2};
-  vec3_copy_into(&s.center, &center);
-  s.radius = 0.7;
-  hit_record rec;
-
-  bool hit = hit_sphere(&s, r, 0, RAYTRACE_INFINITY, &rec);
-  */
-
   hit_record rec;
   rec.t = 0.0;
 
@@ -52,6 +53,9 @@ static color ray_color(hittable_list* world, ray* r)
 
 void render(int h, int w)
 {
+  // Seed the RNG
+  srand(1);
+
   //Camera: we define the camera at (0, 0, 0)
   //With the camera axis along the positive Z axis
   //The image plane has a height of 2 and a width according to the aspect ratio
@@ -75,16 +79,18 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
+  int samples_per_pixel = 10;
+
   // World
   sphere s1;
-  point3 center1 = {0,0,2};
+  point3 center1 = {0,0,1};
   vec3_copy_into(&s1.center, &center1);
-  s1.radius = 0.7;
+  s1.radius = 0.5;
 
   sphere s2;
-  point3 center2 = {3,-0.5,4};
+  point3 center2 = {0,100.5,1};
   vec3_copy_into(&s2.center, &center2);
-  s2.radius = 1.2;
+  s2.radius = 100;
 
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
@@ -101,25 +107,30 @@ void render(int h, int w)
   {
     for (int cur_w = 0; cur_w < w; cur_w++)
     {
-      double u = cur_w*1.0/(w - 1.0);
-      double v = cur_h*1.0/(h - 1.0);
+      color c = {0,0,0};
+      for (int s = 0; s < samples_per_pixel; s++)
+      { 
+        double u = (cur_w*1.0 + random_double())/(w - 1.0);
+        double v = (cur_h*1.0 + random_double())/(h - 1.0);
 
-      ray r;
-      //Origin = camera center
-      vec3_copy_into(&r.origin, &camera_center);
-      //r.dir = lower left
-      vec3_copy_into(&r.direction, &upper_left);
-      //r.dir += u*horizontal
-      vec3_copy_into(&acc, &horizontal);
-      vec3_mul(&acc, u);
-      vec3_add(&r.direction, &acc);
-      //r.dir += v*vertical
-      vec3_copy_into(&acc, &vertical);
-      vec3_mul(&acc, v);
-      vec3_add(&r.direction, &acc);
+        ray r;
+        //Origin = camera center
+        vec3_copy_into(&r.origin, &camera_center);
+        //r.dir = lower left
+        vec3_copy_into(&r.direction, &upper_left);
+        //r.dir += u*horizontal
+        vec3_copy_into(&acc, &horizontal);
+        vec3_mul(&acc, u);
+        vec3_add(&r.direction, &acc);
+        //r.dir += v*vertical
+        vec3_copy_into(&acc, &vertical);
+        vec3_mul(&acc, v);
+        vec3_add(&r.direction, &acc);
 
-      color c = ray_color(world, &r);
-
+        color sample_color = ray_color(world, &r);
+        vec3_add(&c, &sample_color);
+      }
+      vec3_mul(&c, 1.0/samples_per_pixel);
       image_buf[cur_h][cur_w].x = c.x;
       image_buf[cur_h][cur_w].y = c.y;
       image_buf[cur_h][cur_w].z = c.z;
