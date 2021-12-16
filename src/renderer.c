@@ -11,27 +11,13 @@
 #include "hittable_type.h"
 #include "hit_record.h"
 #include "hit.h"
+#include "hittable_list.h"
 
 #define RAYTRACE_INFINITY DBL_MAX
 
-/*
-double hit_sphere(point3* center, double radius, ray* r)
-{
-  vec3 oc = vec3_sub_new(&r->origin, center);
-  double a = vec3_dot(&r->direction, &r->direction);
-  double b = 2.0 * vec3_dot(&oc, &r->direction);
-  double c = vec3_dot(&oc, &oc) - radius*radius;
-  double discriminant = b*b - 4*a*c;
-  if (discriminant < 0)
-  {
-    return -1.0;
-  }
-  return (-b - sqrt(discriminant))/(2.0*a);
-}
-*/
-
-static color ray_color(ray* r)
+static color ray_color(hittable_list* world, ray* r)
 { 
+  /* 
   sphere s;
   point3 center = {0,0,2};
   vec3_copy_into(&s.center, &center);
@@ -39,6 +25,12 @@ static color ray_color(ray* r)
   hit_record rec;
 
   bool hit = hit_sphere(&s, r, 0, RAYTRACE_INFINITY, &rec);
+  */
+
+  hit_record rec;
+  rec.t = 0.0;
+
+  bool hit = hit_world(world, r, 0, RAYTRACE_INFINITY, &rec);
   
   if (hit)
   {  
@@ -83,6 +75,20 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
+  // World
+  sphere s1;
+  point3 center1 = {0,0,2};
+  vec3_copy_into(&s1.center, &center1);
+  s1.radius = 0.7;
+
+  sphere s2;
+  point3 center2 = {3,-0.5,4};
+  vec3_copy_into(&s2.center, &center2);
+  s2.radius = 1.2;
+
+  hittable_list* world = init_hittable_list(&s1, hittable_sphere);
+  add_hittable_object(world, &s2, hittable_sphere);
+
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
   for (int i = 0; i < w; i++)
@@ -112,7 +118,7 @@ void render(int h, int w)
       vec3_mul(&acc, v);
       vec3_add(&r.direction, &acc);
 
-      color c = ray_color(&r);
+      color c = ray_color(world, &r);
 
       image_buf[cur_h][cur_w].x = c.x;
       image_buf[cur_h][cur_w].y = c.y;

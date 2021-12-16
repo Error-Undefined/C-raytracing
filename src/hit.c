@@ -1,9 +1,39 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
 
 #include "hit.h"
 #include "hit_record.h"
+#include "hittable_type.h"
 #include "ray.h"
+
+bool hit_world(hittable_list* list, ray* r, double t_min, double t_max, hit_record* rec)
+{
+  hit_record temp_record;
+  bool hit_anything = false;
+  double closest = t_max;
+
+  hittable_list_node* node = get_next_node(list);
+  while(node != NULL)
+  {
+    if (node->object_type == hittable_sphere)
+    {
+      sphere* obj = (sphere*) node->object;
+      if(hit_sphere(obj, r, t_min, closest, &temp_record))
+      {
+        hit_anything = true;
+        closest = temp_record.t;
+        rec->normal = temp_record.normal;
+        rec->p = temp_record.p;
+        rec->t = temp_record.t;
+      }
+    }
+    node = get_next_node(list);
+  }
+  reset_current_list_node(list);
+  return hit_anything;
+}
 
 bool hit_sphere(sphere* s, ray* r, double t_min, double t_max, hit_record* rec)
 {
