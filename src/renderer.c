@@ -5,6 +5,9 @@
 #include <float.h>
 
 #include "renderer.h"
+
+#include "common_utils.h"
+
 #include "fileout.h"
 #include "vector3.h"
 #include "ray.h"
@@ -15,19 +18,14 @@
 
 #define RAYTRACE_INFINITY DBL_MAX
 
-static inline double random_double()
-{
-  double d = rand() / (RAND_MAX - 1.0);
-  return d;
-}
-
-static inline double random_range_double(double min, double max)
-{
-  return min + (max - min)*random_double();
-}
-
-static color ray_color(hittable_list* world, ray* r)
+static color ray_color(hittable_list* world, ray* r, int depth)
 { 
+  if (depth <= 0)
+  {
+    color c_d = {0,0,0};
+    return c_d;
+  }
+
   hit_record rec;
   rec.t = 0.0;
 
@@ -35,13 +33,25 @@ static color ray_color(hittable_list* world, ray* r)
   
   if (hit)
   {  
-    color c = {sqrt(rec.normal.x*rec.normal.x), sqrt(rec.normal.y*rec.normal.y), sqrt(rec.normal.z*rec.normal.z)};
-    return c;
+    // Create target point
+    point3 target = {0,0,0};
+    vec3 random_dev = vec3_random_in_unit_sphere();
+    vec3_copy_into(&target, &rec.p);
+    vec3_add(&target, &rec.normal);
+    vec3_add(&target, &random_dev);
+    
+    //Create a new ray to trace onwards
+    ray trace;
+    trace.origin = rec.p;
+    vec3_copy_into(&trace.direction, &target);
+    vec3_sub(&trace.direction, &rec.p);
+    color c_recurse = ray_color(world, &trace, depth - 1);
+    vec3_mul(&c_recurse, 0.5);
+    return c_recurse;
   }
 
   //vec3_norm(&r->direction);
   double t = 0.5*(r->direction.y/vec3_len(&r->direction) + 1.0);
-
   color c1 = {0.5, 0.7, 1.0};
   color c2 = {1.0, 1.0, 1.0};
 
@@ -79,7 +89,8 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 10;
+  int samples_per_pixel = 20;
+  int ray_depth = 15;
 
   // World
   sphere s1;
@@ -127,13 +138,13 @@ void render(int h, int w)
         vec3_mul(&acc, v);
         vec3_add(&r.direction, &acc);
 
-        color sample_color = ray_color(world, &r);
+        color sample_color = ray_color(world, &r, ray_depth);
         vec3_add(&c, &sample_color);
       }
       vec3_mul(&c, 1.0/samples_per_pixel);
-      image_buf[cur_h][cur_w].x = c.x;
-      image_buf[cur_h][cur_w].y = c.y;
-      image_buf[cur_h][cur_w].z = c.z;
+      image_buf[cur_h][cur_w].x = sqrt(c.x);
+      image_buf[cur_h][cur_w].y = sqrt(c.y);
+      image_buf[cur_h][cur_w].z = sqrt(c.z);
     }
   }
   int file_result = write_file("testfile.ppm", image_buf, h, w);

@@ -3,6 +3,8 @@
 
 #include "vector3.h"
 
+#include "common_utils.h"
+
 struct vector3 *copy_vector3(struct vector3* v)
 {
   struct vector3* vec = malloc(sizeof(struct vector3));
@@ -99,4 +101,28 @@ struct vector3 vec3_cross_new(struct vector3 *u, struct vector3 *other)
   struct vector3 new_vec = {u->x, u->y, u->z};
   vec3_cross(&new_vec, other);
   return new_vec;
+}
+
+struct vector3 vec3_random()
+{
+  struct vector3 new_vec = {random_double(), random_double(), random_double()};
+  return new_vec;
+}
+
+struct vector3 vec3_random_range(double min, double max)
+{
+  struct vector3 new_vec = {random_range_double(min,max), random_range_double(min,max), random_range_double(min,max)};
+  return new_vec;  
+}
+
+struct vector3 vec3_random_in_unit_sphere()
+{
+  double r = random_double();
+  double costheta = random_double();
+  double sintheta = random_double();
+  double cosphi = random_double();
+  double sinphi = random_double();
+
+  struct vector3 new_vec = {r*sintheta*cosphi, r*sintheta*sinphi, r*costheta};
+  return new_vec; 
 }

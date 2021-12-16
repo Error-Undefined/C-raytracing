@@ -27,6 +27,10 @@ struct vector3 vec3_sub_new(struct vector3 *u, struct vector3 *other);
 struct vector3 vec3_mul_new(struct vector3 *u, double t);
 struct vector3 vec3_cross_new(struct vector3 *u, struct vector3 *other);
 
+struct vector3 vec3_random();
+struct vector3 vec3_random_range(double min, double max);
+struct vector3 vec3_random_in_unit_sphere();
+
 
 double vec3_len(struct vector3 *u);
 double vec3_dot(struct vector3 *u, struct vector3 *v);
