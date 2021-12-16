@@ -2,12 +2,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <float.h>
 
 #include "renderer.h"
 #include "fileout.h"
 #include "vector3.h"
 #include "ray.h"
+#include "hittable_type.h"
+#include "hit_record.h"
+#include "hit.h"
 
+#define RAYTRACE_INFINITY DBL_MAX
+
+/*
 double hit_sphere(point3* center, double radius, ray* r)
 {
   vec3 oc = vec3_sub_new(&r->origin, center);
@@ -21,24 +28,26 @@ double hit_sphere(point3* center, double radius, ray* r)
   }
   return (-b - sqrt(discriminant))/(2.0*a);
 }
+*/
 
 static color ray_color(ray* r)
 { 
-  point3 sphere_center = {0,0,2};
-  double radius = 0.7;
+  sphere s;
+  point3 center = {0,0,2};
+  vec3_copy_into(&s.center, &center);
+  s.radius = 0.7;
+  hit_record rec;
 
-  double t = hit_sphere(&sphere_center, radius, r);
-  if (t > 0.0)
-  {
-    vec3 normal = ray_at(r, t);
-    vec3_sub(&normal, &sphere_center);
-    vec3_norm(&normal);
-    color c = {sqrt(normal.x*normal.x), sqrt(normal.y*normal.y), sqrt(normal.z*normal.z)};
+  bool hit = hit_sphere(&s, r, 0, RAYTRACE_INFINITY, &rec);
+  
+  if (hit)
+  {  
+    color c = {sqrt(rec.normal.x*rec.normal.x), sqrt(rec.normal.y*rec.normal.y), sqrt(rec.normal.z*rec.normal.z)};
     return c;
   }
 
   //vec3_norm(&r->direction);
-  t = 0.5*(r->direction.y/vec3_len(&r->direction) + 1.0);
+  double t = 0.5*(r->direction.y/vec3_len(&r->direction) + 1.0);
 
   color c1 = {0.5, 0.7, 1.0};
   color c2 = {1.0, 1.0, 1.0};
