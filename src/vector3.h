@@ -23,10 +23,10 @@ void vec3_mul(struct vector3 *u, double t);
 void vec3_cross(struct vector3 *u, struct vector3 *other);
 void vec3_element_mul(struct vector3 *u, struct vector3 *other);
 
-struct vector3 vec3_add_new(struct vector3 *u, struct vector3 *other);
-struct vector3 vec3_sub_new(struct vector3 *u, struct vector3 *other);
+struct vector3 vec3_add_new(struct vector3 *u, struct vector3 *v);
+struct vector3 vec3_sub_new(struct vector3 *u, struct vector3 *v);
 struct vector3 vec3_mul_new(struct vector3 *u, double t);
-struct vector3 vec3_cross_new(struct vector3 *u, struct vector3 *other);
+struct vector3 vec3_cross_new(struct vector3 *u, struct vector3 *v);
 
 struct vector3 vec3_random();
 struct vector3 vec3_random_range(double min, double max);

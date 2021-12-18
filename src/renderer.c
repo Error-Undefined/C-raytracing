@@ -19,6 +19,18 @@
 
 #define RAYTRACE_INFINITY DBL_MAX
 
+static void make_triangle_norm(triangle* t)
+{
+  vec3 edge0, edge1;
+  vec3_copy_into(&edge0, &t->vertex1);
+  vec3_copy_into(&edge1, &t->vertex2);
+  vec3_sub(&edge0, &t->vertex0);
+  vec3_sub(&edge1, &t->vertex0);
+  
+  t->normal = vec3_cross_new(&edge0, &edge1);
+  vec3_norm(&t->normal);
+}
+
 static color ray_color(hittable_list* world, ray* r, int depth)
 { 
   if (depth <= 0)
@@ -104,14 +116,14 @@ void render(int h, int w)
   vec3_sub(&upper_left, &acc);
 
   int samples_per_pixel = 100;
-  int ray_depth = 20;
+  int ray_depth = 50;
 
   // World
   sphere s1;
   point3 center1 = {0,0,1};
   vec3_copy_into(&s1.center, &center1);
   s1.radius = 0.5;
-  s1.material = dielectric_material;
+  s1.material = lambertian_material;
   s1.albedo = (color) {0.3, 0.3, 0.3};
   s1.fuzz_or_refraction = 1.5;
 
@@ -135,7 +147,7 @@ void render(int h, int w)
   vec3_copy_into(&s4.center, &center4);
   s4.radius = 0.5;
   s4.material = dielectric_material;
-  s4.albedo = (color) {1,1,1};
+  s4.albedo = (color) {1,0,0};
   s4.fuzz_or_refraction = 1.5;
 
   sphere s5;
@@ -146,11 +158,21 @@ void render(int h, int w)
   s5.albedo = (color) {1,1,1};
   s5.fuzz_or_refraction = 1.5;
 
-  hittable_list* world = init_hittable_list(&s1, hittable_sphere);
-  add_hittable_object(world, &s2, hittable_sphere);
+  triangle t1;
+  t1.vertex0 = (point3) {1, 0, 2};
+  t1.vertex1 = (point3) {-1, 0, 2};
+  t1.vertex2 = (point3) {0, -1, 1};
+  make_triangle_norm(&t1);
+  t1.albedo = (color) {0.1, 0.1, 0.1};
+  t1.fuzz_or_refraction = 0.1;
+  t1.material = metal_material;
+
+  hittable_list* world = init_hittable_list(&s2, hittable_sphere);
+  add_hittable_object(world, &s1, hittable_sphere);
   add_hittable_object(world, &s3, hittable_sphere);
   add_hittable_object(world, &s4, hittable_sphere);
-  add_hittable_object(world, &s5, hittable_sphere);
+  //add_hittable_object(world, &s5, hittable_sphere);
+  add_hittable_object(world, &t1, hittable_triangle);
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
@@ -182,7 +204,7 @@ void render(int h, int w)
         //r.dir += v*vertical
         vec3_copy_into(&acc, &vertical);
         vec3_mul(&acc, v);
-        vec3_add(&r.direction, &acc);
+        vec3_add(&r.direction, &acc);         
 
         color sample_color = ray_color(world, &r, ray_depth);
         vec3_add(&c, &sample_color);
