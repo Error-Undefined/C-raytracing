@@ -1,6 +1,8 @@
 #ifndef COMMON_UTILS_H
 #define COMMON_UTILS_H
 
+#include <stdlib.h>
+
 static inline double random_double()
 {
   double d = rand() / (RAND_MAX - 1.0);

@@ -10,7 +10,7 @@ struct hit_record
   vec3 normal;
   color albedo;
   double t;
-  double fuzz;
+  double fuzz_or_refraction;
   material_type material;
 };
 

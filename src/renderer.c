@@ -30,7 +30,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   hit_record rec;
   rec.t = 0.0;
 
-  bool hit = hit_world(world, r, 0.001, RAYTRACE_INFINITY, &rec);
+  bool hit = hit_world(world, r, 0.0001, RAYTRACE_INFINITY, &rec);
   
   if (hit)
   {
@@ -103,7 +103,7 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 20;
+  int samples_per_pixel = 100;
   int ray_depth = 20;
 
   // World
@@ -111,27 +111,46 @@ void render(int h, int w)
   point3 center1 = {0,0,1};
   vec3_copy_into(&s1.center, &center1);
   s1.radius = 0.5;
-  s1.material = lambertian_material;
+  s1.material = dielectric_material;
   s1.albedo = (color) {0.3, 0.3, 0.3};
+  s1.fuzz_or_refraction = 1.5;
 
   sphere s2;
   point3 center2 = {0,100.5,1};
   vec3_copy_into(&s2.center, &center2);
   s2.radius = 100;
   s2.material = lambertian_material;
-  s2.albedo = (color) {0.7, 0.7, 0.7};
+  s2.albedo = (color) {0.8, 0.8, 0};
 
   sphere s3;
-  point3 center3 = {2,-1,2};
+  point3 center3 = {1,0,1};
   vec3_copy_into(&s3.center, &center3);
-  s3.radius = 1;
+  s3.radius = 0.5;
   s3.material = metal_material;
   s3.albedo = (color) {0.2 , 0.2, 0.2};
-  s3.fuzz = 0.2;
+  s3.fuzz_or_refraction = 0.2;
+
+  sphere s4;
+  point3 center4 = {-1,0,1};
+  vec3_copy_into(&s4.center, &center4);
+  s4.radius = 0.5;
+  s4.material = dielectric_material;
+  s4.albedo = (color) {1,1,1};
+  s4.fuzz_or_refraction = 1.5;
+
+  sphere s5;
+  point3 center5 = {-1,0,1};
+  vec3_copy_into(&s5.center, &center5);
+  s5.radius = -0.45;
+  s5.material = dielectric_material;
+  s5.albedo = (color) {1,1,1};
+  s5.fuzz_or_refraction = 1.5;
 
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
   add_hittable_object(world, &s3, hittable_sphere);
+  add_hittable_object(world, &s4, hittable_sphere);
+  add_hittable_object(world, &s5, hittable_sphere);
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
