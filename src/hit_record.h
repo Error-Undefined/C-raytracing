@@ -8,9 +8,10 @@ struct hit_record
 {
   point3 p;
   vec3 normal;
-  double t;
-  material_type material;
   color albedo;
+  double t;
+  double fuzz;
+  material_type material;
 };
 
 typedef struct hit_record hit_record;

@@ -23,6 +23,7 @@ struct sphere
   color albedo;
   point3 center;
   double radius;
+  double fuzz;
   enum material_type_enum material;
 };
 typedef struct sphere sphere;

@@ -26,8 +26,11 @@ static bool scatter_metal(ray* r_in, hit_record* rec, color* attenuation, ray* r
   vec3_mul(&scatter_dir, -2 * vec3_dot(&r_in->direction, &rec->normal));
   vec3_add(&scatter_dir, &r_in->direction);
 
+  vec3 metal_fuzz = vec3_random_in_unit_sphere();
+  vec3_mul(&metal_fuzz, rec->fuzz);
   vec3_copy_into(&r_scattered->origin, &rec->p);
   vec3_copy_into(&r_scattered->direction, &scatter_dir);
+  vec3_add(&r_scattered->direction, &metal_fuzz);
 
   vec3_copy_into(attenuation, &rec->albedo);
 

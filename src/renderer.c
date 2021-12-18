@@ -113,7 +113,6 @@ void render(int h, int w)
   s1.radius = 0.5;
   s1.material = lambertian_material;
   s1.albedo = (color) {0.3, 0.3, 0.3};
-  //vec3_copy_into(&s1.albedo, &albedo);
 
   sphere s2;
   point3 center2 = {0,100.5,1};
@@ -121,7 +120,6 @@ void render(int h, int w)
   s2.radius = 100;
   s2.material = lambertian_material;
   s2.albedo = (color) {0.7, 0.7, 0.7};
-  //vec3_copy_into(&s2.albedo, &albedo);
 
   sphere s3;
   point3 center3 = {2,-1,2};
@@ -129,7 +127,7 @@ void render(int h, int w)
   s3.radius = 1;
   s3.material = metal_material;
   s3.albedo = (color) {0.2 , 0.2, 0.2};
-  //vec3_copy_into(&s3.albedo, &albedo);
+  s3.fuzz = 0.2;
 
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
