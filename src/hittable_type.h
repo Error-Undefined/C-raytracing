@@ -5,7 +5,8 @@
 
 enum hittable_type_enum
 {
-  hittable_sphere = 0x1
+  hittable_sphere = 0x1,
+  hittable_triangle = 0x2
 };
 
 enum material_type_enum
@@ -26,6 +27,18 @@ struct sphere
   double fuzz_or_refraction;
   enum material_type_enum material;
 };
+
+struct triangle
+{
+  color albedo;
+  point3 vertex0, vertex1, vertex2;
+  vec3 normal;
+  double fuzz_or_refraction;
+  enum material_type_enum material;
+};
+
 typedef struct sphere sphere;
+typedef struct triangle triangle;
+
 
 #endif
