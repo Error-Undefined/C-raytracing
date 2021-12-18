@@ -27,6 +27,8 @@ bool hit_world(hittable_list* list, ray* r, double t_min, double t_max, hit_reco
         rec->normal = temp_record.normal;
         rec->p = temp_record.p;
         rec->t = temp_record.t;
+        rec->material = obj->material;
+        rec->albedo = obj->albedo;
       }
     }
     node = get_next_node(list);

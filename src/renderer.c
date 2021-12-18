@@ -15,6 +15,7 @@
 #include "hit_record.h"
 #include "hit.h"
 #include "hittable_list.h"
+#include "scatter.h"
 
 #define RAYTRACE_INFINITY DBL_MAX
 
@@ -32,22 +33,35 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   bool hit = hit_world(world, r, 0.001, RAYTRACE_INFINITY, &rec);
   
   if (hit)
-  {  
-    // Create target point
-    point3 target = {0, 0, 0};
-    vec3 random_dev = vec3_random_unit_vector();
-    vec3_copy_into(&target, &rec.p);
-    vec3_add(&target, &rec.normal);
-    vec3_add(&target, &random_dev);
+  {
+    //Scatter ray
+    ray scattered_ray;
+    color attenuation;
+    if(scatter(r, &rec, &attenuation, &scattered_ray))
+    {
+      color recurse_color = ray_color(world, &scattered_ray, depth - 1);
+      vec3_element_mul(&recurse_color, &attenuation);
+      return recurse_color;
+    }
+
+    /* ----------- */
     
-    //Create a new ray to trace onwards
-    ray trace;
-    trace.origin = rec.p;
-    vec3_copy_into(&trace.direction, &target);
-    vec3_sub(&trace.direction, &rec.p);
-    color c_recurse = ray_color(world, &trace, depth - 1);
-    vec3_mul(&c_recurse, 0.5);
-    return c_recurse;
+    // Create target point
+    // point3 target = {0, 0, 0};
+    // vec3 random_dev = vec3_random_unit_vector();
+    // vec3_copy_into(&target, &rec.p);
+    // vec3_add(&target, &rec.normal);
+    // vec3_add(&target, &random_dev);
+    
+    // //Create a new ray to trace onwards
+    // ray trace;
+    // trace.origin = rec.p;
+    // vec3_copy_into(&trace.direction, &target);
+    // vec3_sub(&trace.direction, &rec.p);
+    // color c_recurse = ray_color(world, &trace, depth - 1);
+    // vec3_mul(&c_recurse, 0.5);
+    // return c_recurse;
+
   }
 
   //vec3_norm(&r->direction);
@@ -94,26 +108,32 @@ void render(int h, int w)
 
   // World
   sphere s1;
-  point3 center1 = {0,-0.1,1};
+  point3 center1 = {0,0,1};
   vec3_copy_into(&s1.center, &center1);
   s1.radius = 0.5;
   s1.material = lambertian_material;
+  s1.albedo = (color) {0.3, 0.3, 0.3};
+  //vec3_copy_into(&s1.albedo, &albedo);
 
   sphere s2;
   point3 center2 = {0,100.5,1};
   vec3_copy_into(&s2.center, &center2);
   s2.radius = 100;
   s2.material = lambertian_material;
+  s2.albedo = (color) {0.7, 0.7, 0.7};
+  //vec3_copy_into(&s2.albedo, &albedo);
 
   sphere s3;
   point3 center3 = {2,-1,2};
   vec3_copy_into(&s3.center, &center3);
   s3.radius = 1;
-  s3.material = lambertian_material;
+  s3.material = metal_material;
+  s3.albedo = (color) {0.2 , 0.2, 0.2};
+  //vec3_copy_into(&s3.albedo, &albedo);
 
   hittable_list* world = init_hittable_list(&s1, hittable_sphere);
   add_hittable_object(world, &s2, hittable_sphere);
-  //add_hittable_object(world, &s3, hittable_sphere);
+  add_hittable_object(world, &s3, hittable_sphere);
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));

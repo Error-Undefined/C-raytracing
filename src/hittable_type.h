@@ -3,14 +3,6 @@
 
 #include "vector3.h"
 
-struct sphere
-{
-  point3 center;
-  double radius;
-  material_type material;
-};
-typedef struct sphere sphere;
-
 enum hittable_type_enum
 {
   hittable_sphere = 0x1
@@ -19,10 +11,20 @@ enum hittable_type_enum
 enum material_type_enum
 {
   lambertian_material = 0x1,
-  metal_material = 0x2
+  metal_material = 0x2,
+  dielectric_material = 0x3
 };
 
 typedef enum hittable_type_enum hittable_type;
 typedef enum material_type_enum material_type;
+
+struct sphere
+{
+  color albedo;
+  point3 center;
+  double radius;
+  enum material_type_enum material;
+};
+typedef struct sphere sphere;
 
 #endif

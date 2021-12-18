@@ -53,6 +53,13 @@ void vec3_cross(struct vector3 *u, struct vector3 *v)
   u->z = z;
 }
 
+void vec3_element_mul(struct vector3 *u, struct vector3 *other)
+{
+  u->x *= other->x;
+  u->y *= other->y;
+  u->z *= other->z;
+}
+
 void vec3_norm(struct vector3 *u)
 {
   double len = vec3_len(u);
@@ -143,4 +150,19 @@ struct vector3 vec3_random_in_hemisphere(vec3* normal)
     vec3_mul(&in_unit_sphere, -1.0);
   }
   return in_unit_sphere;
+}
+
+int vec3_near_zero(struct vector3 *u)
+{
+  if (u->x < 1e-8  && u->x > -1e8)
+  {
+    if (u->y < 1e-8  && u->y > -1e8)
+    {
+      if (u->z < 1e-8  && u->z > -1e8)
+      {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
