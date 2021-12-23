@@ -95,17 +95,18 @@ void render(int h, int w)
   //Camera: we define the camera at (0, 0, 0)
   //With the camera axis along the positive Z axis
   //The image plane has a height of 2 and a width according to the aspect ratio
-
+  struct camera camera;
+  
   //Image plane
-  double img_plane_height = 2.0;
-  double img_plane_width = 2.0*w/h;
-  double focal_length = 1.0;
+  camera.plane_height = 2.0;
+  camera.plane_width = 2.0*w/h;
+  camera.focal_length = 1.2;
 
   //Camera geometry
   point3 camera_center = {0, 0, 0};
-  vec3 center_distance = {0, 0, focal_length};
-  vec3 horizontal = {img_plane_width, 0, 0};
-  vec3 vertical = {0, img_plane_height, 0};
+  vec3 center_distance = {0, 0, camera.focal_length};
+  vec3 horizontal = {camera.plane_width, 0, 0};
+  vec3 vertical = {0, camera.plane_height, 0};
   vec3 upper_left = {0, 0, 0};
   vec3 acc = {0, 0, 0};
 
@@ -115,8 +116,8 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 100;
-  int ray_depth = 30;
+  int samples_per_pixel = 10;
+  int ray_depth = 10;
 
   // World
   sphere s1;
@@ -158,6 +159,14 @@ void render(int h, int w)
   s5.albedo = (color) {1,0,0};
   s5.fuzz_or_refraction = 1.5;
 
+  sphere s6;
+  point3 center6 = {0,0,-2};
+  vec3_copy_into(&s6.center, &center6);
+  s6.radius = 2;
+  s6.material = lambertian_material;
+  s6.albedo = (color) {0.1, 0.1, 0.95};
+  s6.fuzz_or_refraction = 0.1;
+
   triangle t1;
   t1.vertex0 = (point3) {-1.5, -1.5, 1.5};
   t1.vertex1 = (point3) {1.5, 0, 1.3};
@@ -178,12 +187,13 @@ void render(int h, int w)
 
 
   hittable_list* world = init_hittable_list(&s2, hittable_sphere);
-  //add_hittable_object(world, &s1, hittable_sphere);
+  add_hittable_object(world, &s1, hittable_sphere);
   add_hittable_object(world, &s3, hittable_sphere);
-  //add_hittable_object(world, &s4, hittable_sphere);
+  add_hittable_object(world, &s4, hittable_sphere);
   add_hittable_object(world, &s5, hittable_sphere);
-  add_hittable_object(world, &t1, hittable_triangle);
-  add_hittable_object(world, &t2, hittable_triangle);
+  //add_hittable_object(world, &t1, hittable_triangle);
+  //add_hittable_object(world, &t2, hittable_triangle);
+  add_hittable_object(world, &s6, hittable_sphere);
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
@@ -195,6 +205,8 @@ void render(int h, int w)
   //Render loop
   for(int cur_h = 0; cur_h < h; cur_h++)
   {
+    double progress = cur_h * 1.0 / h * 100;
+    printf("Progress: %lf percent\n", progress);
     for (int cur_w = 0; cur_w < w; cur_w++)
     {
       color c = {0,0,0};
