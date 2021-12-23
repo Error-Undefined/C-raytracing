@@ -9,7 +9,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 CFLAGS =  -Og -Wall -Wextra -pedantic-errors -std=c11
 CFLAGS += -g
 CFLAGS += $(DEPFLAGS)
-LDFLAGS = -g -lprofiler
+LDFLAGS = -g -lm
 
 # Targets
 PROGS = main
