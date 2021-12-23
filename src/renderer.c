@@ -6,6 +6,8 @@
 
 #include "renderer.h"
 
+#include "../camera.h"
+
 #include "common_utils.h"
 
 #include "fileout.h"
@@ -87,7 +89,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   return c1;
 }
 
-void render(int h, int w)
+void render(int h, int w, struct camera* camera)
 {
   // Seed the RNG
   srand(1);
@@ -95,18 +97,17 @@ void render(int h, int w)
   //Camera: we define the camera at (0, 0, 0)
   //With the camera axis along the positive Z axis
   //The image plane has a height of 2 and a width according to the aspect ratio
-  struct camera camera;
   
   //Image plane
-  camera.plane_height = 2.0;
-  camera.plane_width = 2.0*w/h;
-  camera.focal_length = 0.8;
+  double img_plane_height = 2.0;
+  double img_plane_width = 2.0*w/h;
+  double cam_focal_length = 0.8;
 
   //Camera geometry
   point3 camera_center = {0, 0, 0};
-  vec3 center_distance = {0, 0, camera.focal_length};
-  vec3 horizontal = {camera.plane_width, 0, 0};
-  vec3 vertical = {0, camera.plane_height, 0};
+  vec3 center_distance = {0, 0, cam_focal_length};
+  vec3 horizontal = {img_plane_width, 0, 0};
+  vec3 vertical = {0, img_plane_height, 0};
   vec3 upper_left = {0, 0, 0};
   vec3 acc = {0, 0, 0};
 
@@ -116,8 +117,8 @@ void render(int h, int w)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 10;
-  int ray_depth = 10;
+  int samples_per_pixel = 100;
+  int ray_depth = 50;
 
   // World
   sphere s1;
@@ -206,7 +207,7 @@ void render(int h, int w)
   for(int cur_h = 0; cur_h < h; cur_h++)
   {
     double progress = cur_h * 1.0 / h * 100;
-    printf("Progress: %lf percent\n", progress);
+    printf("Progress: %.2f%%\n", progress);
     for (int cur_w = 0; cur_w < w; cur_w++)
     {
       color c = {0,0,0};

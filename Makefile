@@ -6,11 +6,10 @@ CC  = $(CXX)
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 # Define preprocessor, compiler, and linker flags.
-CFLAGS =  -Og -Wall -Wextra -pedantic-errors
+CFLAGS =  -Og -Wall -Wextra -pedantic-errors -std=c11
 CFLAGS += -g
 CFLAGS += $(DEPFLAGS)
-LDFLAGS = -g 
-
+LDFLAGS = -g -lprofiler
 
 # Targets
 PROGS = main

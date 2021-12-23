@@ -2,16 +2,9 @@
 #define RENDERER_H
 
 #include "vector3.h"
-
-struct camera
-{
-  int h, w;
-  double plane_width, plane_height;
-  double focal_length;
-  vec3 camera_center;
-};
+#include "../camera.h"
 
 //Entry point to the renderer
-void render(int h, int w);
+void render(int h, int w, struct camera* camera);
 
 #endif
