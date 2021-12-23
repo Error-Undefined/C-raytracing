@@ -100,7 +100,7 @@ void render(int h, int w)
   //Image plane
   camera.plane_height = 2.0;
   camera.plane_width = 2.0*w/h;
-  camera.focal_length = 1.2;
+  camera.focal_length = 0.8;
 
   //Camera geometry
   point3 camera_center = {0, 0, 0};
@@ -197,7 +197,7 @@ void render(int h, int w)
 
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
-  for (int i = 0; i < w; i++)
+  for (int i = 0; i < h; i++)
   {
     image_buf[i] = calloc(w, sizeof(color));
   }
