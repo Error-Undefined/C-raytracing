@@ -17,9 +17,9 @@ int main(int argc, char** argv)
   #endif //PROFILE_CODE
 
   struct camera c;
-  c.focal_length = 1;
-  c.camera_center = (vec3) {1.5, -1.5, -1};
-  vec3 camera_to = {0,0,1};
+  c.focal_length = 0.8;
+  c.camera_center = (vec3) {0, -2, -4};
+  vec3 camera_to = {0,0,-2};
   c.view_dir = vec3_sub_new(&camera_to, &c.camera_center);
   c.camera_up = (vec3) {0,-1,0};
 

@@ -1,15 +1,16 @@
 # Define the compiler and the linker.
-CXX = gcc
+CXX = gcc-10
 CC  = $(CXX)
 
 # Generate dependencies in *.d files
 DEPFLAGS = -MT $@ -MMD -MP -MF $*.d
 
 # Define preprocessor, compiler, and linker flags.
-CFLAGS =  -Og -Wall -Wextra -pedantic-errors 
-CFLAGS += -g
+CFLAGS =  -O2 -Wall -Wextra -pedantic-errors 
+#CFLAGS += -g
 CFLAGS += $(DEPFLAGS)
-LDFLAGS = -g -lm
+LDFLAGS = -lm
+#LDFLAGS += -g
 
 # Targets
 PROGS = main

@@ -113,6 +113,7 @@ void render(int h, int w, struct camera* camera)
   if (camera != NULL)
   {
     cam_focal_length = camera->focal_length;
+    center_distance = (vec3) {0, 0, cam_focal_length};
     vec3_copy_into(&camera_center, &camera->camera_center);
     vec3_norm(&camera->view_dir);
     vec3_norm(&camera->camera_up);
@@ -130,9 +131,10 @@ void render(int h, int w, struct camera* camera)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 20;
+  int samples_per_pixel = 100;
   int ray_depth = 50;
 
+  /*
   // World
   sphere s1;
   point3 center1 = {0,0,4};
@@ -208,6 +210,85 @@ void render(int h, int w, struct camera* camera)
   // add_hittable_object(world, &t2, hittable_triangle);
   add_hittable_object(world, &s6, hittable_sphere);
 
+  */
+
+  sphere ground_sphere;
+  ground_sphere.center = (vec3) {0, 1000, 0};
+  ground_sphere.radius = 1000;
+  ground_sphere.material = lambertian_material;
+  ground_sphere.albedo = (vec3) {0.5, 0.5, 0.5};
+  ground_sphere.fuzz_or_refraction = 1;
+
+  hittable_list* world_random = init_hittable_list(&ground_sphere, hittable_sphere);
+
+  sphere sphere_list[22*22];
+  int spere_list_it = 0;
+  for(int a = -11; a < 11; a++)
+  {
+    for(int b = -11; b < 11; b++)
+    {
+      double choose_mat = random_double();
+      point3 center = {a + 0.9*random_double(), -0.2, b + 0.9*random_double()};
+      point3 other_c = {4,0.2,0};
+      vec3 condition;
+      vec3_copy_into(&condition, &center);
+      vec3_sub(&condition, &other_c);
+
+      if(vec3_dot(&condition,&condition) > 0.81)
+      {
+        sphere* sphere_pointer = &sphere_list[spere_list_it];
+        vec3_copy_into(&sphere_pointer->center, &center);
+        sphere_pointer->albedo = (vec3) {random_double(),random_double(),random_double()};
+        sphere_pointer->radius = random_range_double(0.18,0.2); 
+        if (choose_mat < 0.8)
+        {
+          // Lambertian
+          sphere_pointer->material = lambertian_material;
+          sphere_pointer->fuzz_or_refraction = 1;
+        }
+        else if (choose_mat < 0.95)
+        {
+          // Metal
+          sphere_pointer->material = metal_material;
+          sphere_pointer->fuzz_or_refraction = random_range_double(0.1, 0.7);
+        }
+        else
+        {
+          // Dielectric
+          sphere_pointer->material = dielectric_material;
+          sphere_pointer->fuzz_or_refraction = random_range_double(1.1, 1.7);
+        }
+        add_hittable_object(world_random, sphere_pointer, hittable_sphere);
+        spere_list_it++;
+      }
+    }
+  }
+
+  sphere example1;
+  example1.material = lambertian_material;
+  example1.albedo = (vec3) {0.4, 0.2, 0.1};
+  example1.center = (vec3) {-4, -1, 0};
+  example1.radius = 1;
+  example1.fuzz_or_refraction = 1;
+
+  sphere example2;
+  example2.material = metal_material;
+  example2.albedo = (vec3) {0.7, 0.6, 0.5};
+  example2.center = (vec3) {0, -1, 0};
+  example2.radius = 1;
+  example2.fuzz_or_refraction = 0.1;
+
+  sphere example3;
+  example3.material = dielectric_material;
+  example3.albedo = (vec3) {0.4, 0.2, 0.1};
+  example3.center = (vec3) {4, -1, 0};
+  example3.radius = 1;
+  example3.fuzz_or_refraction = 1.5;
+
+  add_hittable_object(world_random, &example1, hittable_sphere);
+  add_hittable_object(world_random, &example2, hittable_sphere);
+  add_hittable_object(world_random, &example3, hittable_sphere);
+
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
   for (int i = 0; i < h; i++)
@@ -242,7 +323,7 @@ void render(int h, int w, struct camera* camera)
         vec3_mul(&acc, v);
         vec3_add(&r.direction, &acc);         
 
-        color sample_color = ray_color(world, &r, ray_depth);
+        color sample_color = ray_color(world_random, &r, ray_depth);
         vec3_add(&c, &sample_color);
       }
       vec3_mul(&c, 1.0/samples_per_pixel);
