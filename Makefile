@@ -1,5 +1,5 @@
 # Define the compiler and the linker.
-CXX = gcc-10
+CXX = gcc
 CC  = $(CXX)
 
 # Generate dependencies in *.d files

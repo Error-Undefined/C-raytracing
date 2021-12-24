@@ -8,6 +8,7 @@
 main
 *.ppm
 *.log
+*.jpg
 
 #macos
 .DS_store

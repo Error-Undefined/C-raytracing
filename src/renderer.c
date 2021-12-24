@@ -132,7 +132,7 @@ void render(int h, int w, struct camera* camera)
   vec3_sub(&upper_left, &acc);
 
   int samples_per_pixel = 100;
-  int ray_depth = 50;
+  int ray_depth = 30;
 
   /*
   // World
@@ -333,7 +333,7 @@ void render(int h, int w, struct camera* camera)
       image_buf[cur_h][cur_w].z = sqrt(c.z);
     }
   }
-  int file_result = write_file("testfile.ppm", image_buf, h, w);
+  int file_result = write_file("render.ppm", image_buf, h, w);
   printf("Rendering finished with code %d\n", file_result);
 
   for (int i = 0; i < h; i++)
