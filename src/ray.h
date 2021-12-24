@@ -9,7 +9,7 @@ struct ray
   vec3 direction;
 };
 
-point3 ray_at(struct ray* r, double t);
+void ray_at(vec3* vec_into, struct ray* ray_from, double t);
 
 typedef struct ray ray;
 

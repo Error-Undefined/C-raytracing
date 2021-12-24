@@ -10,6 +10,7 @@
 
 bool hit_sphere(sphere* s, ray* r, double t_min, double t_max, hit_record* rec)
 {
+
   vec3 oc;
   vec3_copy_into(&oc, &r->origin);
   vec3_sub(&oc, &s->center);
@@ -17,10 +18,12 @@ bool hit_sphere(sphere* s, ray* r, double t_min, double t_max, hit_record* rec)
   double half_b = vec3_dot(&oc, &r->direction);
   double c = vec3_dot(&oc, &oc) - s->radius*s->radius;
   double discriminant = half_b*half_b - a*c;
+
   if (discriminant < 0)
   {
     return false;
   }
+
   // Try and see if any of the two roots are in the acceptable range
   double sqrtd = sqrt(discriminant);
 
@@ -35,7 +38,9 @@ bool hit_sphere(sphere* s, ray* r, double t_min, double t_max, hit_record* rec)
   }
 
   rec->t = root;
-  rec->p = ray_at(r, rec->t);
+
+  ray_at(&rec->p, r, rec->t);
+
   // normal = (touch_point - center)/radius
   vec3_copy_into(&rec->normal, &s->center);
   //rec->normal = s->center;
@@ -95,7 +100,7 @@ bool hit_triangle(triangle* t, ray* r, double t_min, double t_max, hit_record* r
   if (t_intersect > t_min && t_intersect < t_max)
   {
     rec->t = t_intersect;
-    rec->p = ray_at(r, rec->t);
+    ray_at(&rec->p, r, rec->t);
     return true;
   }
   return false;
@@ -129,8 +134,6 @@ bool hit_world(hittable_list* list, ray* r, double t_min, double t_max, hit_reco
   hit_record temp_record;
   bool hit_anything = false;
   double closest = t_max;
-
-  vec3 distance_vec;
 
   hittable_list_node* node = get_next_node(list);
   while(node != NULL)
