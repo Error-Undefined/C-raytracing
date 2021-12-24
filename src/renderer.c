@@ -104,20 +104,26 @@ void render(int h, int w, struct camera* camera)
   double cam_focal_length = 1;
 
   point3 camera_center = {0, 0, 0};
-
-  if (camera != NULL)
-  {
-    cam_focal_length = camera->focal_length;
-    vec3_copy_into(&camera_center, &camera->camera_center);
-  }
-
-  //Camera geometry
   vec3 center_distance = {0, 0, cam_focal_length};
   vec3 horizontal = {img_plane_width, 0, 0};
   vec3 vertical = {0, img_plane_height, 0};
   vec3 upper_left = {0, 0, 0};
   vec3 acc = {0, 0, 0};
 
+  if (camera != NULL)
+  {
+    cam_focal_length = camera->focal_length;
+    vec3_copy_into(&camera_center, &camera->camera_center);
+    vec3_norm(&camera->view_dir);
+    vec3_norm(&camera->camera_up);
+
+    horizontal = vec3_cross_new(&camera->view_dir, &camera->camera_up);
+    vec3_mul(&horizontal, img_plane_width);
+
+    vec3_copy_into(&vertical, &camera->camera_up);
+    vec3_mul(&vertical, -1*img_plane_height);
+  }
+  
   vec3_copy_into(&acc, &horizontal);
   vec3_add(&acc, &vertical);
   vec3_mul(&acc, 0.5);

@@ -8,6 +8,7 @@ struct camera
   double focal_length;
   vec3 camera_center;
   vec3 view_dir;
+  vec3 camera_up;
 };
 
 #endif
