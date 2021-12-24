@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#define PI 3.1415926535897932384626433832
+
 static inline double random_double()
 {
   double d = rand() / (RAND_MAX - 1.0);

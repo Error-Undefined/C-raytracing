@@ -101,10 +101,17 @@ void render(int h, int w, struct camera* camera)
   //Image plane
   double img_plane_height = 2.0;
   double img_plane_width = 2.0*w/h;
-  double cam_focal_length = 0.8;
+  double cam_focal_length = 1;
+
+  point3 camera_center = {0, 0, 0};
+
+  if (camera != NULL)
+  {
+    cam_focal_length = camera->focal_length;
+    vec3_copy_into(&camera_center, &camera->camera_center);
+  }
 
   //Camera geometry
-  point3 camera_center = {0, 0, 0};
   vec3 center_distance = {0, 0, cam_focal_length};
   vec3 horizontal = {img_plane_width, 0, 0};
   vec3 vertical = {0, img_plane_height, 0};
@@ -117,16 +124,16 @@ void render(int h, int w, struct camera* camera)
   vec3_sub(&acc, &center_distance);
   vec3_sub(&upper_left, &acc);
 
-  int samples_per_pixel = 100;
+  int samples_per_pixel = 20;
   int ray_depth = 50;
 
   // World
   sphere s1;
-  point3 center1 = {0,0,1};
+  point3 center1 = {0,0,4};
   vec3_copy_into(&s1.center, &center1);
   s1.radius = 0.5;
   s1.material = lambertian_material;
-  s1.albedo = (color) {0.3, 0.3, 0.3};
+  s1.albedo = (color) {0.1, 0.9, 0.2};
   s1.fuzz_or_refraction = 1.5;
 
   sphere s2;
@@ -134,36 +141,36 @@ void render(int h, int w, struct camera* camera)
   vec3_copy_into(&s2.center, &center2);
   s2.radius = 100;
   s2.material = lambertian_material;
-  s2.albedo = (color) {0.8, 0.8, 0};
+  s2.albedo = (color) {0.5, 0.5, 0.5};
 
   sphere s3;
   point3 center3 = {1,0,1};
   vec3_copy_into(&s3.center, &center3);
   s3.radius = 0.5;
-  s3.material = metal_material;
-  s3.albedo = (color) {0.5 , 0.5, 0.5};
+  s3.material = lambertian_material;
+  s3.albedo = (color) {1 , 0.5, 0.5};
   s3.fuzz_or_refraction = 0.2;
 
   sphere s4;
-  point3 center4 = {-1,0,1};
+  point3 center4 = {0,0,1};
   vec3_copy_into(&s4.center, &center4);
-  s4.radius = 0.5;
-  s4.material = lambertian_material;
-  s4.albedo = (color) {1,0,0};
-  s4.fuzz_or_refraction = 1.5;
+  s4.radius = 0.4;
+  s4.material = dielectric_material;
+  s4.albedo = (color) {1,1,1};
+  s4.fuzz_or_refraction = 1.8;
 
   sphere s5;
-  point3 center5 = {0,0,1};
+  point3 center5 = {-1,0,1};
   vec3_copy_into(&s5.center, &center5);
   s5.radius = 0.5;
-  s5.material = dielectric_material;
-  s5.albedo = (color) {1,0,0};
-  s5.fuzz_or_refraction = 1.5;
+  s5.material = metal_material;
+  s5.albedo = (color) {1,1,0};
+  s5.fuzz_or_refraction = 0.9;
 
   sphere s6;
-  point3 center6 = {0,0,-2};
+  point3 center6 = {-1,-1,-3};
   vec3_copy_into(&s6.center, &center6);
-  s6.radius = 2;
+  s6.radius = 1;
   s6.material = lambertian_material;
   s6.albedo = (color) {0.1, 0.1, 0.95};
   s6.fuzz_or_refraction = 0.1;
@@ -173,7 +180,7 @@ void render(int h, int w, struct camera* camera)
   t1.vertex1 = (point3) {1.5, 0, 1.3};
   t1.vertex2 = (point3) {-1.5, 0, 1.3};
   make_triangle_norm(&t1);
-  t1.albedo = (color) {0.5, 0.5, 0.5};
+  t1.albedo = (color) {0.5, 0.5, 0.8};
   t1.fuzz_or_refraction = 0.1;
   t1.material = lambertian_material;
 
@@ -182,18 +189,17 @@ void render(int h, int w, struct camera* camera)
   t2.vertex1 = (point3) {1.5, -1.5, 1.5};
   t2.vertex2 = (point3) {1.5, 0, 1.3};
   make_triangle_norm(&t2);
-  t2.albedo = (color) {0.5, 0.5, 0.5};
+  t2.albedo = (color) {0.5, 0.5, 0.8};
   t2.fuzz_or_refraction = 0.1;
-  t2.material = metal_material;
-
+  t2.material = lambertian_material;
 
   hittable_list* world = init_hittable_list(&s2, hittable_sphere);
   add_hittable_object(world, &s1, hittable_sphere);
   add_hittable_object(world, &s3, hittable_sphere);
   add_hittable_object(world, &s4, hittable_sphere);
   add_hittable_object(world, &s5, hittable_sphere);
-  //add_hittable_object(world, &t1, hittable_triangle);
-  //add_hittable_object(world, &t2, hittable_triangle);
+  // add_hittable_object(world, &t1, hittable_triangle);
+  // add_hittable_object(world, &t2, hittable_triangle);
   add_hittable_object(world, &s6, hittable_sphere);
 
   // Allocate the image buffer
@@ -242,4 +248,10 @@ void render(int h, int w, struct camera* camera)
   }
   int file_result = write_file("testfile.ppm", image_buf, h, w);
   printf("Rendering finished with code %d\n", file_result);
+
+  for (int i = 0; i < h; i++)
+  {
+    free(image_buf[i]);
+  }
+  free(image_buf);
 }

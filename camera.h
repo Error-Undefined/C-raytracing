@@ -5,10 +5,9 @@
 
 struct camera
 {
-  int h, w;
-  double plane_width, plane_height;
   double focal_length;
   vec3 camera_center;
+  vec3 view_dir;
 };
 
 #endif

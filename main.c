@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "src/renderer.h"
+#include "camera.h"
 
 #ifdef PROFILE_CODE
 #include <gperftools/profiler.h>
@@ -15,11 +16,16 @@ int main(int argc, char** argv)
   ProfilerStart("test.log");
   #endif //PROFILE_CODE
 
+  struct camera c;
+  c.focal_length = 3;
+  c.camera_center = (vec3) {0, 0, -4};
+  c.view_dir = (vec3) {0,0,1};
+
   int t0 = time(NULL);
   if (argc < 3)
   { 
     //Render for example at 16:9 ratio, 800x450 now
-    render(450, 800, NULL);
+    render(450, 800, &c);
     int t1 = time(NULL);
     printf("Rendering took %d seconds\n", t1-t0);
     exit(0);
@@ -31,7 +37,7 @@ int main(int argc, char** argv)
     printf("Could not parse command line args\n");
     exit(1);
   }
-  render(h, w, NULL);
+  render(h, w, &c);
   int t1 = time(NULL);
   printf("Rendering took %d seconds\n", t1-t0);
 
