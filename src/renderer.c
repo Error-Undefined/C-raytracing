@@ -20,6 +20,8 @@
 #include "scatter.h"
 
 #define RAYTRACE_INFINITY DBL_MAX
+#define RANDOM_SCENE 1
+
 
 static void make_triangle_norm(triangle* t)
 {
@@ -69,7 +71,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   return c1;
 }
 
-ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* horizontal, vec3* vertical, double aperture, double focus_distance)
+ray get_ray(double u, double v, double aperture, vec3* camera_center, vec3* upper_left, vec3* horizontal, vec3* vertical, vec3* horizontal_unit, vec3* vertical_unit)
 {
   ray r;
   vec3 acc = {0,0,0}; //Accumulator for calculations
@@ -77,8 +79,8 @@ ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* hor
   vec3_copy_into(&r.origin, camera_center);
   //Add an offset according to the aperture
   vec3 vertical_offset, horizontal_offset, random_offset;
-  vec3_copy_into(&vertical_offset, vertical);
-  vec3_copy_into(&horizontal_offset, horizontal);
+  vec3_copy_into(&vertical_offset, vertical_unit);
+  vec3_copy_into(&horizontal_offset, horizontal_unit);
 
   random_offset=vec3_random_in_unit_circle();
   vec3_mul(&random_offset, aperture/2);
@@ -87,6 +89,8 @@ ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* hor
 
   vec3_add(&r.origin, &vertical_offset);
   vec3_add(&r.origin, &horizontal_offset);
+
+  //printf("%lf %lf %lf\n", vertical_offset.x, vertical_offset.y, vertical_offset.z);
 
   //r.dir = lower left
   vec3_copy_into(&r.direction, upper_left);
@@ -98,6 +102,8 @@ ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* hor
   vec3_copy_into(&acc, vertical);
   vec3_mul(&acc, v);
   vec3_add(&r.direction, &acc);
+  //r.dir -= offset
+  vec3_sub(&r.direction, &random_offset);
   return r;
 }
 
@@ -105,9 +111,6 @@ void render(int h, int w, struct camera* camera)
 {
   // Seed the RNG
   srand(1);
-
-
-  //Default Image plane
 
   struct camera default_camera;
   // If no camera, use the default camera
@@ -122,6 +125,7 @@ void render(int h, int w, struct camera* camera)
     default_camera.img_plane_height = 2.0;
     default_camera.view_dir = (vec3) {0,0,1};
   }
+  //Image plane
   double img_plane_height = camera->img_plane_height;
   double img_plane_width = img_plane_height * w/h;
 
@@ -146,19 +150,26 @@ void render(int h, int w, struct camera* camera)
   vec3_norm(&camera->camera_up);
 
   horizontal = vec3_cross_new(&camera->view_dir, &camera->camera_up);
-  vec3_mul(&horizontal, img_plane_width);
+  vec3_copy_into(&unit_horizontal, &horizontal);
+  vec3_mul(&horizontal, img_plane_width*2*focus_distance);
 
   vec3_copy_into(&vertical, &camera->camera_up);
-  vec3_mul(&vertical, -1*img_plane_height);
+  vec3_mul(&vertical, -1);
+  vec3_copy_into(&unit_vertical, &vertical);
+  vec3_mul(&vertical, img_plane_height*2*focus_distance);
     
   vec3_copy_into(&acc, &horizontal);
   vec3_add(&acc, &vertical);
   vec3_mul(&acc, 0.5);
-  vec3_sub(&acc, &center_vector_to_plane);
   vec3_sub(&upper_left, &acc);
+
+  vec3_copy_into(&acc, &center_vector_to_plane);
+  vec3_mul(&acc, focus_distance);
+  vec3_add(&upper_left, &acc);
   
-  int samples_per_pixel = 100;
-  int ray_depth = 30;
+  
+  int samples_per_pixel = 20;
+  int ray_depth = 10;
 
   #ifndef RANDOM_SCENE
   // World
@@ -292,7 +303,7 @@ void render(int h, int w, struct camera* camera)
   sphere example1;
   example1.material = lambertian_material;
   example1.albedo = (vec3) {0.4, 0.2, 0.1};
-  example1.center = (vec3) {-4, -1, 0};
+  example1.center = (vec3) {-3, -1, 0};
   example1.radius = 1;
   example1.fuzz_or_refraction = 1;
 
@@ -306,7 +317,7 @@ void render(int h, int w, struct camera* camera)
   sphere example3;
   example3.material = dielectric_material;
   example3.albedo = (vec3) {0.4, 0.2, 0.1};
-  example3.center = (vec3) {4, -1, 0};
+  example3.center = (vec3) {3, -1, 0};
   example3.radius = 1;
   example3.fuzz_or_refraction = 1.5;
 
@@ -336,7 +347,7 @@ void render(int h, int w, struct camera* camera)
         double u = (cur_w*1.0 + random_double())/(w - 1.0);
         double v = (cur_h*1.0 + random_double())/(h - 1.0);
 
-        ray r = get_ray(u, v, &camera_center, &upper_left, &horizontal, &vertical, aperture, focus_distance);
+        ray r = get_ray(u, v, aperture, &camera_center, &upper_left, &horizontal, &vertical, &unit_horizontal, &unit_vertical);
         
         #ifndef RANDOM_SCENE
         color sample_color = ray_color(world, &r, ray_depth);
