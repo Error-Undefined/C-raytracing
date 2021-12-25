@@ -5,15 +5,6 @@
 
 #include "common_utils.h"
 
-struct vector3 *copy_vector3(struct vector3* v)
-{
-  struct vector3* vec = malloc(sizeof(struct vector3));
-  vec->x = v->x;
-  vec->y = v->y;
-  vec->z = v->z;
-  return vec;
-}
-
 void vec3_copy_into(struct vector3* to, struct vector3* from)
 {
   to->x = from->x;

@@ -11,8 +11,6 @@ typedef struct vector3 vec3;
 typedef struct vector3 point3;
 typedef struct vector3 color;
 
-struct vector3 *copy_vector3(struct vector3* v);
-
 void vec3_copy_into(struct vector3* to, struct vector3* from);
 
 // Vector3 inplace functions
