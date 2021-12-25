@@ -17,13 +17,14 @@ int main(int argc, char** argv)
   #endif //PROFILE_CODE
 
   struct camera c;
-  c.focal_length = 1.5;
-  c.camera_center = (vec3) {2, 0, -2};
+  c.focal_length = 1;
+  c.camera_center = (vec3) {2, -1, -3};
   vec3 camera_to = {1,0,-0.4};
   c.view_dir = vec3_sub_new(&camera_to, &c.camera_center);
   c.camera_up = (vec3) {0,-1,0};
-  c.aperture = 0.1;
+  c.aperture = 0;
   c.focus_distance = 1;
+  c.img_plane_height = 2.0;
 
   int t0 = time(NULL);
   if (argc < 3)

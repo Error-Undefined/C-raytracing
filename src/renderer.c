@@ -69,12 +69,25 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   return c1;
 }
 
-ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* horizontal, vec3* vertical)
+ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* horizontal, vec3* vertical, double aperture, double focus_distance)
 {
   ray r;
   vec3 acc = {0,0,0}; //Accumulator for calculations
   //Origin = camera center
   vec3_copy_into(&r.origin, camera_center);
+  //Add an offset according to the aperture
+  vec3 vertical_offset, horizontal_offset, random_offset;
+  vec3_copy_into(&vertical_offset, vertical);
+  vec3_copy_into(&horizontal_offset, horizontal);
+
+  random_offset=vec3_random_in_unit_circle();
+  vec3_mul(&random_offset, aperture/2);
+  vec3_mul(&vertical_offset, random_offset.y);
+  vec3_mul(&horizontal_offset, random_offset.x);
+
+  vec3_add(&r.origin, &vertical_offset);
+  vec3_add(&r.origin, &horizontal_offset);
+
   //r.dir = lower left
   vec3_copy_into(&r.direction, upper_left);
   //r.dir += u*horizontal
@@ -93,48 +106,57 @@ void render(int h, int w, struct camera* camera)
   // Seed the RNG
   srand(1);
 
-  //Camera: we define the camera at (0, 0, 0)
-  //With the camera axis along the positive Z axis
-  //The image plane has a height of 2 and a width according to the aspect ratio
-  //Image plane
-  double img_plane_height = 2.0;
-  double img_plane_width = 2.0*w/h;
-  double cam_focal_length = 1;
 
-  point3 camera_center = {0, 0, 0};
-  vec3 center_distance = {0, 0, cam_focal_length};
-  vec3 horizontal = {img_plane_width, 0, 0};
-  vec3 vertical = {0, img_plane_height, 0};
+  //Default Image plane
+
+  struct camera default_camera;
+  // If no camera, use the default camera
+  if(camera == NULL)
+  {
+    camera = &default_camera;
+    default_camera.aperture = 0;
+    default_camera.camera_center = (vec3) {0,0,0};
+    default_camera.camera_up = (vec3) {0,-1,0};
+    default_camera.focal_length = 1;
+    default_camera.focus_distance = 1;
+    default_camera.img_plane_height = 2.0;
+    default_camera.view_dir = (vec3) {0,0,1};
+  }
+  double img_plane_height = camera->img_plane_height;
+  double img_plane_width = img_plane_height * w/h;
+
+  double aperture = camera->aperture;
+  double focus_distance = camera->focus_distance;
+  double cam_focal_length = camera->focal_length;
+
+  point3 camera_center = camera->camera_center;
+
+  vec3 horizontal, vertical;
+  vec3 unit_horizontal, unit_vertical;
+  vec3 center_vector_to_plane;
+
   vec3 upper_left = {0, 0, 0};
   vec3 acc = {0, 0, 0};
 
-  double aperture = 0;
-  double focus_distance = 1;
+  // Create the vector from camera center to middle of image plane
+  vec3_copy_into(&center_vector_to_plane, &camera->view_dir);
+  vec3_mul(&center_vector_to_plane, cam_focal_length);
 
-  if (camera != NULL)
-  {
-    aperture = camera->aperture;
-    focus_distance = camera->focus_distance;
+  vec3_norm(&camera->view_dir);
+  vec3_norm(&camera->camera_up);
 
-    cam_focal_length = camera->focal_length;
-    center_distance = (vec3) {0, 0, cam_focal_length};
-    vec3_copy_into(&camera_center, &camera->camera_center);
-    vec3_norm(&camera->view_dir);
-    vec3_norm(&camera->camera_up);
+  horizontal = vec3_cross_new(&camera->view_dir, &camera->camera_up);
+  vec3_mul(&horizontal, img_plane_width);
 
-    horizontal = vec3_cross_new(&camera->view_dir, &camera->camera_up);
-    vec3_mul(&horizontal, img_plane_width);
-
-    vec3_copy_into(&vertical, &camera->camera_up);
-    vec3_mul(&vertical, -1*img_plane_height);
-  }
-  
+  vec3_copy_into(&vertical, &camera->camera_up);
+  vec3_mul(&vertical, -1*img_plane_height);
+    
   vec3_copy_into(&acc, &horizontal);
   vec3_add(&acc, &vertical);
   vec3_mul(&acc, 0.5);
-  vec3_sub(&acc, &center_distance);
+  vec3_sub(&acc, &center_vector_to_plane);
   vec3_sub(&upper_left, &acc);
-
+  
   int samples_per_pixel = 100;
   int ray_depth = 30;
 
@@ -210,8 +232,8 @@ void render(int h, int w, struct camera* camera)
   add_hittable_object(world, &s3, hittable_sphere);
   add_hittable_object(world, &s4, hittable_sphere);
   add_hittable_object(world, &s5, hittable_sphere);
-  add_hittable_object(world, &t1, hittable_triangle);
-  add_hittable_object(world, &t2, hittable_triangle);
+  // add_hittable_object(world, &t1, hittable_triangle);
+  // add_hittable_object(world, &t2, hittable_triangle);
   add_hittable_object(world, &s6, hittable_sphere);
 
   #else
@@ -314,7 +336,7 @@ void render(int h, int w, struct camera* camera)
         double u = (cur_w*1.0 + random_double())/(w - 1.0);
         double v = (cur_h*1.0 + random_double())/(h - 1.0);
 
-        ray r = get_ray(u, v, &camera_center, &upper_left, &horizontal, &vertical);
+        ray r = get_ray(u, v, &camera_center, &upper_left, &horizontal, &vertical, aperture, focus_distance);
         
         #ifndef RANDOM_SCENE
         color sample_color = ray_color(world, &r, ray_depth);
