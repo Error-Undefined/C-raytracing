@@ -33,7 +33,7 @@ int main(int argc, char** argv)
   if (argc < 3)
   { 
     //Render for example at 16:9 ratio, 800x450 now
-    render(450, 800, 40, 10, NULL);
+    render(450, 800, 70, 10, NULL);
     int t1 = time(NULL);
     printf("Rendering took %d seconds\n", t1-t0);
     exit(0);

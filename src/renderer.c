@@ -20,7 +20,7 @@
 #include "scatter.h"
 
 #define RAYTRACE_INFINITY DBL_MAX
-#define RANDOM_SCENE 1
+// #define RANDOM_SCENE 1
 
 
 static void make_triangle_norm(triangle* t)
@@ -117,11 +117,11 @@ void render(int h, int w, int samples_per_pixel, int ray_depth, struct camera* c
   if(camera == NULL)
   {
     camera = &default_camera;
-    default_camera.aperture = 0;
+    default_camera.aperture = 0.1;
     default_camera.camera_center = (vec3) {0,0,0};
     default_camera.camera_up = (vec3) {0,-1,0};
-    default_camera.focal_length = 1;
-    default_camera.focus_distance = 1;
+    default_camera.focal_length = 1.5;
+    default_camera.focus_distance = 0.7;
     default_camera.img_plane_height = 2.0;
     default_camera.view_dir = (vec3) {0,0,1};
   }
@@ -197,18 +197,18 @@ void render(int h, int w, int samples_per_pixel, int ray_depth, struct camera* c
   sphere s4;
   point3 center4 = {0,0,1};
   vec3_copy_into(&s4.center, &center4);
-  s4.radius = 0.4;
-  s4.material = dielectric_material;
-  s4.albedo = (color) {1,1,1};
-  s4.fuzz_or_refraction = 1.3;
+  s4.radius = 0.5;
+  s4.material = metal_material;
+  s4.albedo = (color) {1,1,0};
+  s4.fuzz_or_refraction = 0.9;
 
   sphere s5;
   point3 center5 = {-1,0,1};
   vec3_copy_into(&s5.center, &center5);
   s5.radius = 0.5;
-  s5.material = metal_material;
+  s5.material = dielectric_material;
   s5.albedo = (color) {1,1,0};
-  s5.fuzz_or_refraction = 0.9;
+  s5.fuzz_or_refraction = 1.3;
 
   sphere s6;
   point3 center6 = {-1,-1,-3};
