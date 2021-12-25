@@ -37,8 +37,7 @@ static color ray_color(hittable_list* world, ray* r, int depth)
 { 
   if (depth <= 0)
   {
-    color c_d = {0,0,0};
-    return c_d;
+    return (color) {0,0,0};
   }
 
   hit_record rec;
@@ -57,28 +56,9 @@ static color ray_color(hittable_list* world, ray* r, int depth)
       vec3_element_mul(&recurse_color, &attenuation);
       return recurse_color;
     }
-
-    /* ----------- */
-    
-    // Create target point
-    // point3 target = {0, 0, 0};
-    // vec3 random_dev = vec3_random_unit_vector();
-    // vec3_copy_into(&target, &rec.p);
-    // vec3_add(&target, &rec.normal);
-    // vec3_add(&target, &random_dev);
-    
-    // //Create a new ray to trace onwards
-    // ray trace;
-    // trace.origin = rec.p;
-    // vec3_copy_into(&trace.direction, &target);
-    // vec3_sub(&trace.direction, &rec.p);
-    // color c_recurse = ray_color(world, &trace, depth - 1);
-    // vec3_mul(&c_recurse, 0.5);
-    // return c_recurse;
-
+    return (color) {0,0,0};
   }
 
-  //vec3_norm(&r->direction);
   double t = 0.5*(r->direction.y/vec3_len(&r->direction) + 1.0);
   color c1 = {0.5, 0.7, 1.0};
   color c2 = {1.0, 1.0, 1.0};
@@ -89,6 +69,25 @@ static color ray_color(hittable_list* world, ray* r, int depth)
   return c1;
 }
 
+ray get_ray(double u, double v, vec3* camera_center, vec3* upper_left, vec3* horizontal, vec3* vertical)
+{
+  ray r;
+  vec3 acc = {0,0,0}; //Accumulator for calculations
+  //Origin = camera center
+  vec3_copy_into(&r.origin, camera_center);
+  //r.dir = lower left
+  vec3_copy_into(&r.direction, upper_left);
+  //r.dir += u*horizontal
+  vec3_copy_into(&acc, horizontal);
+  vec3_mul(&acc, u);
+  vec3_add(&r.direction, &acc);
+  //r.dir += v*vertical
+  vec3_copy_into(&acc, vertical);
+  vec3_mul(&acc, v);
+  vec3_add(&r.direction, &acc);
+  return r;
+}
+
 void render(int h, int w, struct camera* camera)
 {
   // Seed the RNG
@@ -97,7 +96,6 @@ void render(int h, int w, struct camera* camera)
   //Camera: we define the camera at (0, 0, 0)
   //With the camera axis along the positive Z axis
   //The image plane has a height of 2 and a width according to the aspect ratio
-  
   //Image plane
   double img_plane_height = 2.0;
   double img_plane_width = 2.0*w/h;
@@ -190,34 +188,33 @@ void render(int h, int w, struct camera* camera)
   s6.fuzz_or_refraction = 0.1;
 
   triangle t1;
-  t1.vertex0 = (point3) {-1.5, -1.5, 1.5};
-  t1.vertex1 = (point3) {1.5, 0, 1.3};
-  t1.vertex2 = (point3) {-1.5, 0, 1.3};
+  t1.vertex0 = (point3) {-3, -3, 2};
+  t1.vertex1 = (point3) {-3, 0, 2};
+  t1.vertex2 = (point3) {3, 0, 2};
   make_triangle_norm(&t1);
-  t1.albedo = (color) {0.5, 0.5, 0.8};
+  t1.albedo = (color) {0.2, 0.2, 0.2};
   t1.fuzz_or_refraction = 0.1;
-  t1.material = lambertian_material;
+  t1.material = metal_material;
 
   triangle t2;
-  t2.vertex0 = (point3) {-1.5, -1.5, 1.5};
-  t2.vertex1 = (point3) {1.5, -1.5, 1.5};
-  t2.vertex2 = (point3) {1.5, 0, 1.3};
+  t2.vertex0 = (point3) {3, -3, 2};
+  t2.vertex1 = (point3) {-3, -3, 2};
+  t2.vertex2 = (point3) {3, 0, 2};
   make_triangle_norm(&t2);
-  t2.albedo = (color) {0.5, 0.5, 0.8};
+  t2.albedo = (color) {0.2, 0.2, 0.2};
   t2.fuzz_or_refraction = 0.1;
-  t2.material = lambertian_material;
+  t2.material = metal_material;
 
   hittable_list* world = init_hittable_list(&s2, hittable_sphere);
   add_hittable_object(world, &s1, hittable_sphere);
   add_hittable_object(world, &s3, hittable_sphere);
   add_hittable_object(world, &s4, hittable_sphere);
   add_hittable_object(world, &s5, hittable_sphere);
-  // add_hittable_object(world, &t1, hittable_triangle);
-  // add_hittable_object(world, &t2, hittable_triangle);
+  add_hittable_object(world, &t1, hittable_triangle);
+  add_hittable_object(world, &t2, hittable_triangle);
   add_hittable_object(world, &s6, hittable_sphere);
 
   #else
-
   sphere ground_sphere;
   ground_sphere.center = (vec3) {0, 1000, 0};
   ground_sphere.radius = 1000;
@@ -317,20 +314,8 @@ void render(int h, int w, struct camera* camera)
         double u = (cur_w*1.0 + random_double())/(w - 1.0);
         double v = (cur_h*1.0 + random_double())/(h - 1.0);
 
-        ray r;
-        //Origin = camera center
-        vec3_copy_into(&r.origin, &camera_center);
-
-        //r.dir = lower left
-        vec3_copy_into(&r.direction, &upper_left);
-        //r.dir += u*horizontal
-        vec3_copy_into(&acc, &horizontal);
-        vec3_mul(&acc, u);
-        vec3_add(&r.direction, &acc);
-        //r.dir += v*vertical
-        vec3_copy_into(&acc, &vertical);
-        vec3_mul(&acc, v);
-        vec3_add(&r.direction, &acc);       
+        ray r = get_ray(u, v, &camera_center, &upper_left, &horizontal, &vertical);
+        
         #ifndef RANDOM_SCENE
         color sample_color = ray_color(world, &r, ray_depth);
         #else

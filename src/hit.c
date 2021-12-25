@@ -54,8 +54,8 @@ bool hit_sphere(sphere* s, ray* r, double t_min, double t_max, hit_record* rec)
 bool hit_triangle(triangle* t, ray* r, double t_min, double t_max, hit_record* rec)
 {
   //If we come from behind the triangle, we don't hit
-  //This happens when the dot product is negative
-  if (vec3_dot(&t->normal, &r->direction) <= 0)
+  //This happens when the dot product is positive
+  if (vec3_dot(&t->normal, &r->direction) > 0)
   {
     return false;
   }
