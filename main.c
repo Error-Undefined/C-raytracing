@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     printf("Could not parse command line args\n");
     exit(1);
   }
-  render(450, 800, samples_per_pixel, ray_depth,&c);
+  render(h, w, samples_per_pixel, ray_depth, &c);
   int t1 = time(NULL);
   printf("Rendering took %d seconds\n", t1-t0);
 
