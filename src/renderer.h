@@ -5,6 +5,6 @@
 #include "../camera.h"
 
 //Entry point to the renderer
-void render(int h, int w, struct camera* camera);
+void render(int h, int w, int samples_per_pixel, int ray_depth, struct camera* camera);
 
 #endif

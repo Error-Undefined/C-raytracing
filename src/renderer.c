@@ -107,7 +107,7 @@ ray get_ray(double u, double v, double aperture, vec3* camera_center, vec3* uppe
   return r;
 }
 
-void render(int h, int w, struct camera* camera)
+void render(int h, int w, int samples_per_pixel, int ray_depth, struct camera* camera)
 {
   // Seed the RNG
   srand(1);
@@ -168,8 +168,6 @@ void render(int h, int w, struct camera* camera)
   vec3_add(&upper_left, &acc);
   
   
-  int samples_per_pixel = 20;
-  int ray_depth = 10;
 
   #ifndef RANDOM_SCENE
   // World
