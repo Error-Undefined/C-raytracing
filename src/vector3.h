@@ -31,6 +31,7 @@ struct vector3 vec3_cross_new(struct vector3 *u, struct vector3 *v);
 struct vector3 vec3_random();
 struct vector3 vec3_random_range(double min, double max);
 struct vector3 vec3_random_in_unit_sphere();
+struct vector3 vec3_random_in_unit_circle();
 struct vector3 vec3_random_unit_vector();
 struct vector3 vec3_random_in_hemisphere(vec3* normal);
 

@@ -110,8 +110,14 @@ void render(int h, int w, struct camera* camera)
   vec3 upper_left = {0, 0, 0};
   vec3 acc = {0, 0, 0};
 
+  double aperture = 0;
+  double focus_distance = 1;
+
   if (camera != NULL)
   {
+    aperture = camera->aperture;
+    focus_distance = camera->focus_distance;
+
     cam_focal_length = camera->focal_length;
     center_distance = (vec3) {0, 0, cam_focal_length};
     vec3_copy_into(&camera_center, &camera->camera_center);
@@ -134,7 +140,7 @@ void render(int h, int w, struct camera* camera)
   int samples_per_pixel = 100;
   int ray_depth = 30;
 
-  /*
+  #ifndef RANDOM_SCENE
   // World
   sphere s1;
   point3 center1 = {0,0,4};
@@ -165,7 +171,7 @@ void render(int h, int w, struct camera* camera)
   s4.radius = 0.4;
   s4.material = dielectric_material;
   s4.albedo = (color) {1,1,1};
-  s4.fuzz_or_refraction = 1.8;
+  s4.fuzz_or_refraction = 1.3;
 
   sphere s5;
   point3 center5 = {-1,0,1};
@@ -210,7 +216,7 @@ void render(int h, int w, struct camera* camera)
   // add_hittable_object(world, &t2, hittable_triangle);
   add_hittable_object(world, &s6, hittable_sphere);
 
-  */
+  #else
 
   sphere ground_sphere;
   ground_sphere.center = (vec3) {0, 1000, 0};
@@ -289,6 +295,8 @@ void render(int h, int w, struct camera* camera)
   add_hittable_object(world_random, &example2, hittable_sphere);
   add_hittable_object(world_random, &example3, hittable_sphere);
 
+  #endif // RANDOM_SCENE
+
   // Allocate the image buffer
   color** image_buf = calloc(h, sizeof(color*));
   for (int i = 0; i < h; i++)
@@ -312,6 +320,7 @@ void render(int h, int w, struct camera* camera)
         ray r;
         //Origin = camera center
         vec3_copy_into(&r.origin, &camera_center);
+
         //r.dir = lower left
         vec3_copy_into(&r.direction, &upper_left);
         //r.dir += u*horizontal
@@ -321,9 +330,12 @@ void render(int h, int w, struct camera* camera)
         //r.dir += v*vertical
         vec3_copy_into(&acc, &vertical);
         vec3_mul(&acc, v);
-        vec3_add(&r.direction, &acc);         
-
+        vec3_add(&r.direction, &acc);       
+        #ifndef RANDOM_SCENE
+        color sample_color = ray_color(world, &r, ray_depth);
+        #else
         color sample_color = ray_color(world_random, &r, ray_depth);
+        #endif
         vec3_add(&c, &sample_color);
       }
       vec3_mul(&c, 1.0/samples_per_pixel);

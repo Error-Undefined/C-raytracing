@@ -135,6 +135,16 @@ struct vector3 vec3_random_in_unit_sphere()
   return new_vec; 
 }
 
+struct vector3 vec3_random_in_unit_circle()
+{
+  double r = random_double();
+  double costheta = random_double();
+
+  double sintheta = sqrt(1 - costheta*costheta);
+
+  return (vec3) {r*costheta, r*sintheta, 0};
+}
+
 struct vector3 vec3_random_unit_vector()
 {
   vec3 in_sphere = vec3_random_in_unit_sphere();
