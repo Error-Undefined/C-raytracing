@@ -16,9 +16,13 @@ LDFLAGS += -g
 PROGS = main
 all: $(PROGS)
 
+BIN_NAME = main
 # Targets rely on implicit rules for compiling and linking
-main: main.o ./src/fileout.o ./src/vector3.o ./src/renderer.o ./src/hittable_list.o ./src/hit.o ./src/ray.o ./src/scatter.o
 
+TARGET_O_FILES = main.o ./src/fileout.o ./src/vector3.o ./src/renderer.o ./src/hittable_list.o ./src/hit.o ./src/ray.o ./src/scatter.o
+
+main: $(TARGET_O_FILES)
+			$(CC) $(TARGET_O_FILES) -o $(BIN_NAME) $(LDFLAGS)
 # Phony targets
 .PHONY: all all_objs clean 
 
